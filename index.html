@@ -1,0 +1,535 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot | Groq</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #11182b;
+            padding: 22px;
+            border-right: 1px solid #283149;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #8b9cff;
+        }
+
+        .new-chat {
+            background: #6875f5;
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .sidebar h3 {
+            font-size: 13px;
+            color: #9ca8c4;
+            margin: 28px 0 14px;
+        }
+
+        .history {
+            color: #d3daeb;
+            font-size: 14px;
+            line-height: 2.5;
+        }
+
+        .sidebar-note {
+            margin-top: auto;
+            color: #8d99b5;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        /* Main chat */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .topbar {
+            padding: 20px 28px;
+            border-bottom: 1px solid #283149;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar h2 {
+            font-size: 20px;
+        }
+
+        .status {
+            color: #75e6a3;
+            font-size: 13px;
+        }
+
+        .chat-area {
+            flex: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .welcome {
+            text-align: center;
+            margin: auto 0 15px;
+        }
+
+        .bot-icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #6875f5, #a855f7);
+            display: grid;
+            place-items: center;
+            font-size: 32px;
+            margin: 0 auto 20px;
+        }
+
+        .welcome h1 {
+            font-size: 30px;
+            margin-bottom: 12px;
+        }
+
+        .welcome p {
+            color: #a6b1ca;
+            line-height: 1.6;
+        }
+
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .suggestion {
+            background: #141d33;
+            color: #e1e7f5;
+            border: 1px solid #303b56;
+            padding: 16px;
+            text-align: left;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .suggestion:hover {
+            border-color: #8994ff;
+            background: #1b2642;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: #273454;
+        }
+
+        .message.user .avatar {
+            background: #4f46e5;
+        }
+
+        .message-content {
+            background: #151e33;
+            padding: 14px 16px;
+            border-radius: 5px 14px 14px 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            max-width: 100%;
+        }
+
+        .message.user .message-content {
+            background: #28365a;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message.user .message-content {
+            border-radius: 14px 5px 14px 14px;
+        }
+
+        .typing {
+            color: #a6b1ca;
+            font-size: 14px;
+            padding: 5px;
+        }
+
+        /* Input area */
+        .composer-wrap {
+            padding: 16px 24px 22px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .composer {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #35415e;
+            background: #151e33;
+            border-radius: 16px;
+        }
+
+        .composer textarea {
+            flex: 1;
+            resize: none;
+            min-width: 0;
+            max-height: 150px;
+            border: none;
+            outline: none;
+            color: white;
+            background: transparent;
+            padding: 10px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .composer textarea::placeholder {
+            color: #8d99b5;
+        }
+
+        .send-btn {
+            background: #6875f5;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .footer-text {
+            color: #8490aa;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .error {
+            color: #ffaaaa;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                display: none;
+            }
+
+            .topbar {
+                padding: 17px;
+            }
+
+            .chat-area {
+                padding: 20px 14px;
+            }
+
+            .welcome h1 {
+                font-size: 24px;
+            }
+
+            .suggestions {
+                grid-template-columns: 1fr;
+            }
+
+            .composer-wrap {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="logo">✦ AI Assistant</div>
+
+        <button class="new-chat" onclick="newChat()">
+            + New Chat
+        </button>
+
+        <h3>YOUR CHAT</h3>
+        <div class="history">
+            <div>💬 Current conversation</div>
+        </div>
+
+        <div class="sidebar-note">
+            Powered by Groq API<br>
+            AI Assistant Web App
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <h2>AI Chatbot</h2>
+            <span class="status">● Assistant</span>
+        </header>
+
+        <section class="chat-area" id="chatArea">
+
+            <div class="welcome" id="welcome">
+                <div class="bot-icon">✦</div>
+
+                <h1>How can I help you?</h1>
+
+                <p>
+                    Ask a question, learn something new,
+                    or get help with your work.
+                </p>
+
+                <div class="suggestions">
+                    <button class="suggestion"
+                        onclick="askSuggestion('Explain Artificial Intelligence in simple words')">
+                        💡 Explain Artificial Intelligence
+                    </button>
+
+                    <button class="suggestion"
+                        onclick="askSuggestion('Teach me Python programming')">
+                        💻 Teach me Python
+                    </button>
+
+                    <button class="suggestion"
+                        onclick="askSuggestion('Give me an interesting school project idea')">
+                        🚀 School project ideas
+                    </button>
+
+                    <button class="suggestion"
+                        onclick="askSuggestion('Explain Machine Learning with examples')">
+                        📚 Learn Machine Learning
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <div class="composer-wrap">
+
+            <form class="composer" id="chatForm">
+                <textarea
+                    id="userInput"
+                    rows="1"
+                    placeholder="Message your AI assistant..."
+                    aria-label="Write your message"
+                    required></textarea>
+
+                <button class="send-btn" id="sendBtn"
+                    type="submit" aria-label="Send message">
+                    ➤
+                </button>
+            </form>
+
+            <div class="error" id="error"></div>
+
+            <p class="footer-text">
+                AI can make mistakes. Verify important information.
+            </p>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const chatArea = document.getElementById("chatArea");
+    const welcome = document.getElementById("welcome");
+    const userInput = document.getElementById("userInput");
+    const chatForm = document.getElementById("chatForm");
+    const sendBtn = document.getElementById("sendBtn");
+    const errorBox = document.getElementById("error");
+
+    // Replace this with your deployed backend URL.
+    // Example: https://your-backend.example.com/api/chat
+    const API_URL = "YOUR_BACKEND_URL/api/chat";
+
+    let isLoading = false;
+
+    function addMessage(text, sender) {
+        const message = document.createElement("div");
+        message.className = "message " + sender;
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = sender === "user" ? "👤" : "✦";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+
+        // textContent keeps the AI response as plain text.
+        content.textContent = text;
+
+        message.appendChild(avatar);
+        message.appendChild(content);
+        chatArea.appendChild(message);
+
+        chatArea.scrollTop = chatArea.scrollHeight;
+        message.scrollIntoView({ behavior: "smooth", block: "end" });
+
+        return message;
+    }
+
+    async function sendMessage(text) {
+        text = text.trim();
+
+        if (!text || isLoading) return;
+
+        if (welcome) {
+            welcome.remove();
+        }
+
+        errorBox.textContent = "";
+        addMessage(text, "user");
+
+        userInput.value = "";
+        userInput.style.height = "auto";
+
+        isLoading = true;
+        sendBtn.disabled = true;
+
+        const typing = document.createElement("div");
+        typing.className = "typing";
+        typing.textContent = "AI is thinking...";
+        chatArea.appendChild(typing);
+
+        try {
+            if (API_URL.includes("YOUR_BACKEND_URL")) {
+                throw new Error(
+                    "Backend connect nahi hai. API_URL mein apne deployed backend ka URL add karein."
+                );
+            }
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: text
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("Server error: " + response.status);
+            }
+
+            const data = await response.json();
+
+            if (typeof data.reply !== "string") {
+                throw new Error("Server se valid reply nahi mila.");
+            }
+
+            addMessage(data.reply, "bot");
+
+        } catch (error) {
+            errorBox.textContent =
+                "Error: " + error.message;
+        } finally {
+            typing.remove();
+            isLoading = false;
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+    }
+
+    chatForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        sendMessage(userInput.value);
+    });
+
+    userInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            chatForm.requestSubmit();
+        }
+    });
+
+    userInput.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height =
+            Math.min(this.scrollHeight, 150) + "px";
+    });
+
+    function askSuggestion(text) {
+        sendMessage(text);
+    }
+
+    function newChat() {
+        chatArea.innerHTML = "";
+        errorBox.textContent = "";
+
+        const newWelcome = document.createElement("div");
+        newWelcome.className = "welcome";
+        newWelcome.innerHTML = `
+            <div class="bot-icon">✦</div>
+            <h1>How can I help you?</h1>
+            <p>Start a new conversation with your AI assistant.</p>
+        `;
+
+        chatArea.appendChild(newWelcome);
+        userInput.value = "";
+        userInput.focus();
+    }
+</script>
+
+</body>
+</html>
